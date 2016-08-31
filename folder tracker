@@ -1,0 +1,30 @@
+# To run use 'python folder-tracker.py <directory to track>'
+
+import time
+import sys
+from subprocess import check_output
+from subprocess import call
+
+file_to_track = sys.argv[1]
+
+def publishIPNS(filename):
+    ipfs_add_filename = 'ipfs add -r %s' % filename
+
+    print "Getting Hash from Filename..."
+    output_string_from_filename = check_output(ipfs_add_filename, shell=True)
+
+    for line in output_string_from_filename.split('\n'):
+        if line.endswith(filename):
+            last_line = line
+    parts = last_line.split(' ')
+    output_hash_from_filename = parts[1]
+    print output_hash_from_filename
+
+    print "Getting IPNS Hash Resolved..."
+    ipfs_publish_ipns = 'ipfs name publish %s' % output_hash_from_filename
+    ipns_publish_command = call(ipfs_publish_ipns, shell=True)
+    print "IPNS fully resolved..."
+
+while True:
+    publishIPNS(file_to_track)
+    time.sleep(60)
